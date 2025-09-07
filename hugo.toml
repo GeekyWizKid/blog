@@ -11,7 +11,12 @@ disableLanguages = ['en']
 
 
 
-theme = 'blowfish'
+## Use Hugo Modules to import the theme instead of vendoring under themes/
+# theme = 'blowfish'
+
+[module]
+  [[module.imports]]
+    path = "github.com/nunocoracao/blowfish/v2"
 
 [params]
   # Blowfish theme params

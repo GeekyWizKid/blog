@@ -15,5 +15,15 @@ else
 fi
 
 echo "Building with baseURL=${BASE_URL} (env=${VERCEL_ENV:-local})"
-hugo --gc --minify -b "${BASE_URL}"
 
+# Ensure Hugo Modules are resolved (requires Go in PATH)
+if command -v go >/dev/null 2>&1; then
+  echo "Resolving Hugo modules..."
+  hugo mod get -u
+  hugo mod tidy || true
+else
+  echo "[warn] 'go' not found; skipping 'hugo mod' step."
+  echo "       Ensure Go is available in CI when using Hugo Modules."
+fi
+
+hugo --gc --minify -b "${BASE_URL}"
