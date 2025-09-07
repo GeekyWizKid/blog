@@ -1,0 +1,36 @@
+name: Deploy to Aliyun OSS
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Hugo
+        uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: '0.149.1'
+          extended: true
+
+      - name: Build
+        run: hugo --minify
+
+      - name: Setup ossutil
+        uses: manyuanrong/setup-ossutil@v3
+        with:
+          endpoint: ${{ secrets.OSS_ENDPOINT }}
+          accessKeyId: ${{ secrets.OSS_ACCESS_KEY_ID }}
+          accessKeySecret: ${{ secrets.OSS_ACCESS_KEY_SECRET }}
+
+      - name: Sync to OSS
+        env:
+          BUCKET: ${{ secrets.OSS_BUCKET }}
+        run: |
+          ossutil rm -rf oss://$BUCKET/ --only-current-dir --force || true
+          ossutil cp -rf public/ oss://$BUCKET/
+

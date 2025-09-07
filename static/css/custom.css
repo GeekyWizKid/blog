@@ -1,0 +1,133 @@
+/* Minimal opinionated tweaks to make FixIt cleaner */
+:root {
+  --accent: #2563eb; /* Tailwind blue-600 */
+  --code-bg: #f8fafc;
+  --code-border: #e5e7eb;
+  --code-lnum-bg: #f1f5f9;
+  --code-lnum: #94a3b8;
+  --code-text: #0f172a;
+}
+
+/* Limit reading width for better readability */
+.page .single .content,
+.page .summary,
+.page .page-content {
+  max-width: 760px;
+  margin-inline: auto;
+}
+
+/* Softer header and smaller height */
+header.site-header {
+  box-shadow: none;
+}
+
+/* System font stack (fast, CJK friendly) */
+body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, PingFang SC, Noto Sans CJK SC, Hiragino Sans GB, Microsoft YaHei, Arial, sans-serif;
+}
+code, pre, kbd, samp {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* Featured image and cards subtle rounding */
+.single .featured-image img,
+.post-list .summary,
+.archive-item-link {
+  border-radius: 10px;
+}
+
+/* Accent links */
+a { color: var(--accent); }
+a:hover { opacity: .9; }
+
+/* Compact meta */
+.post-meta { opacity: .85; }
+
+/* Clamp cards: title and summary to avoid extra tall cards */
+.group.relative .group-hover-card-title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.group.relative .prose {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-height: 6.2em; /* approx for 3 lines */
+}
+
+/* Home intro block */
+.home-intro {
+  margin: 1.5rem auto 0;
+  max-width: 780px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: rgba(0,0,0,0.04);
+}
+[data-theme='dark'] .home-intro {
+  background: rgba(255,255,255,0.06);
+}
+.home-intro .sub { opacity: .7; font-size: 0.95rem; }
+.home-intro .links { margin-top: 6px; }
+.home-intro .links a { text-decoration: underline; font-weight: 500; }
+[data-theme='dark'] :root {
+  --code-bg: #0f172a; /* slate-900 */
+  --code-border: #334155; /* slate-700 */
+  --code-lnum-bg: #0b1220; /* near bg */
+  --code-lnum: #64748b; /* slate-500 */
+  --code-text: #e5e7eb; /* slate-200 */
+}
+
+/* Code blocks: keep theme defaults (Chroma). Minimal rounding only */
+.highlight pre { border-radius: 8px; }
+
+/* Copy button refinement */
+.copy-button {
+  top: .3rem;
+  right: .3rem;
+  border-bottom-left-radius: .5rem;
+}
+
+/* Inline code */
+.prose code:not([class]) {
+  background: var(--code-lnum-bg);
+  color: var(--code-text);
+  border: 1px solid var(--code-border);
+  border-radius: .4rem;
+  padding: .12rem .35rem;
+}
+
+/* Mac-style code block wrapper */
+.code-mac { 
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: 12px;
+  box-shadow: 0 10px 28px rgba(2,6,23,.12);
+  margin: 0.75rem 0 1.25rem;
+  overflow: hidden;
+}
+.code-mac__title{
+  height: 28px; display:flex; align-items:center; gap:8px;
+  padding: 0 10px; 
+  background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.7));
+  border-bottom: 1px solid var(--code-border);
+}
+[data-theme='dark'] .code-mac__title{ background: linear-gradient(180deg, rgba(51,65,85,.8), rgba(15,23,42,.6)); }
+.code-mac__title .dot{ width:10px; height:10px; border-radius:50%; display:inline-block; }
+.code-mac__title .dot.red{ background:#ff5f56; }
+.code-mac__title .dot.yellow{ background:#ffbd2e; }
+.code-mac__title .dot.green{ background:#27c93f; }
+.code-mac .highlight{ border:none; box-shadow:none; border-radius:0; }
+.code-mac__title .code-title{ margin-left:4px; font-size:.8rem; opacity:.75; }
+.code-mac__title .code-lang{ margin-left:auto; font-size:.72rem; padding:.1rem .45rem; border-radius:.4rem; background: var(--code-lnum-bg); color: var(--code-text); border: 1px solid var(--code-border); }
+
+/* Mermaid container style */
+.mermaid{ 
+  background: var(--code-bg);
+  border: 1px solid var(--code-border);
+  border-radius: 12px; 
+  padding: 1rem; 
+  box-shadow: 0 10px 28px rgba(2,6,23,.12);
+}

@@ -1,0 +1,40 @@
+{{ define "main" }}
+  {{ .Scratch.Set "scope" "list" }}
+
+  {{/* Background hero like list pages */}}
+  {{ if site.Params.list.showHero | default false }}
+    {{ $heroStyle := print "hero/" site.Params.list.heroStyle ".html" }}
+    {{ if templates.Exists ( printf "partials/%s" $heroStyle ) }}
+      {{ partial $heroStyle . }}
+    {{ else }}
+      {{ partial "hero/basic.html" . }}
+    {{ end }}
+  {{ end }}
+
+  <header class="relative z-10">
+    <h1 class="mt-5 text-4xl font-extrabold text-neutral-900 dark:text-neutral">{{ .Title }}</h1>
+    {{ with .Params.description }}
+      <p class="mt-2 text-neutral-500 dark:text-neutral-400">{{ . }}</p>
+    {{ end }}
+  </header>
+
+  {{/* Aggregate posts from main sections and group by year */}}
+  {{ $sections := site.MainSections }}
+  {{ $all := where site.RegularPages "Type" "in" $sections }}
+
+  {{ if gt (len $all) 0 }}
+    {{ $groups := $all.GroupByDate "2006" }}
+    {{ $p := .Paginate $groups }}
+
+    {{ range $p.PageGroups }}
+      <h2 class="mt-12 mb-3 text-2xl font-bold text-neutral-700 first:mt-8 dark:text-neutral-300">{{ .Key }}</h2>
+      <section class="w-full grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+        {{ range .Pages }}
+          {{ partial "article-link/card.html" . }}
+        {{ end }}
+      </section>
+    {{ end }}
+
+    {{ partial "pagination.html" . }}
+  {{ end }}
+{{ end }}

@@ -1,0 +1,206 @@
+baseURL = 'https://example.org/'
+title = '劝退师说'
+languageCode = 'zh-cn'
+defaultContentLanguage = 'zh-cn'
+pagination = { pagerSize = 10 }
+enableRobotsTXT = true
+hasCJKLanguage = true
+mainSections = ['tech', 'life', 'books', 'photos']
+summaryLength = 36
+disableLanguages = ['en']
+
+
+
+theme = 'blowfish'
+
+[params]
+  # Blowfish theme params
+  colorScheme = 'slate'            # calm neutral palette
+  defaultAppearance = 'light'       # light | dark
+  autoSwitchAppearance = true
+  enableA11y = false
+  enableSearch = true
+  enableCodeCopy = true
+  mainSections = ['tech', 'life', 'books', 'photos']
+  disableImageOptimization = true
+  disableImageOptimizationMD = true
+  disableTextInHeader = false
+  defaultBackgroundImage = '/img/background.svg'
+  defaultFeaturedImage = '/img/featured-min.svg'
+  defaultSocialImage = '/img/blowfish_banner.png'
+  highlightCurrentMenuArea = true
+  smartTOC = true
+  smartTOCHideUnfocusedChildren = false
+
+[params.Author]
+  name = '温州程序员劝退师'
+  headline = 'AI Agents · LLM 工具链 · 分布式'
+  image = '/images/avatar.png'
+  links = [
+    { github = 'https://github.com/GeekyWizKid' },
+    { x-twitter = 'https://x.com/named_Das' }
+  ]
+
+[params.header]
+  layout = 'fixed-fill-blur'   # blurred, glassy navbar
+
+  
+
+[params.footer]
+  showMenu = true
+  showCopyright = true
+  showThemeAttribution = false
+  showAppearanceSwitcher = true
+  showScrollToTop = true
+
+[params.homepage]
+  layout = 'background'          # page | profile | hero | card | background | custom
+  homepageImage = '/img/background.svg'
+  showRecent = true
+  cardView = true
+  showRecentItems = 12
+  showMoreLink = true
+  showMoreLinkDest = 'tech'
+  layoutBackgroundBlur = true
+  disableHeroImageFilter = false
+
+[params.article]
+  showDate = true
+  showAuthor = true
+  showHero = false              # hide big hero in post pages
+  heroStyle = 'basic'
+  showBreadcrumbs = true
+  showPagination = true
+  showReadingTime = true
+  showTableOfContents = true
+  showRelatedContent = true
+  relatedContentLimit = 6
+  showTaxonomies = true
+  showAuthorsBadges = false
+  showWordCount = false
+  sharingLinks = ['wechat','weibo','twitter','telegram','email']
+  showZenMode = true
+
+[params.list]
+  showHero = true
+  heroStyle = 'background'
+  layoutBackgroundBlur = true
+  layoutBackgroundHeaderSpace = false
+  showBreadcrumbs = false
+  showSummary = true
+  showViews = false
+  showLikes = false
+  showTableOfContents = false
+  showCards = true
+  orderByWeight = true
+  groupByYear = true
+  cardView = true
+  cardViewScreenWidth = false
+  constrainItemsWidth = true
+
+# Taxonomy and term pages: keep clean background
+[params.taxonomy]
+  showTermCount = true
+  showHero = true
+  heroStyle = 'background'
+  showBreadcrumbs = false
+  showViews = false
+  showLikes = false
+  showTableOfContents = false
+  cardView = true
+
+[params.term]
+  showHero = true
+  heroStyle = 'background'
+  showBreadcrumbs = false
+  showViews = false
+  showLikes = false
+  showTableOfContents = false
+  groupByYear = false
+  cardView = true
+  cardViewScreenWidth = false
+
+ 
+
+ 
+
+[menu]
+  [[menu.main]]
+    name = '技术'
+    url = '/tech/'
+    pageRef = 'tech'
+    identifier = 'tech'
+    weight = 1
+  [[menu.main]]
+    name = '日常'
+    url = '/life/'
+    pageRef = 'life'
+    identifier = 'life'
+    weight = 2
+  [[menu.main]]
+    name = '读书'
+    url = '/books/'
+    pageRef = 'books'
+    identifier = 'books'
+    weight = 3
+  [[menu.main]]
+    name = '照片'
+    url = '/photos/'
+    pageRef = 'photos'
+    identifier = 'photos'
+    weight = 4
+  [[menu.main]]
+    name = '归档'
+    url = '/archives/'
+    identifier = 'archives'
+    weight = 90
+  [[menu.main]]
+    name = '分类'
+    url = '/categories/'
+    identifier = 'categories'
+    weight = 91
+  [[menu.main]]
+    name = '标签'
+    url = '/tags/'
+    identifier = 'tags'
+    weight = 92
+  [[menu.main]]
+    name = '关于'
+    url = '/about/'
+    identifier = 'about'
+    weight = 100
+
+[taxonomies]
+  category = 'categories'
+  tag = 'tags'
+  series = 'series'
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+  [markup.highlight]
+    codeFences = true
+    lineNos = false
+    lineNumbersInTable = false
+    noClasses = false
+    guessSyntax = true
+    style = 'github'
+
+[outputs]
+  home = ['html', 'rss']
+  page = ['html']
+  section = ['html', 'rss']
+  taxonomy = ['html']
+  term = ['html', 'rss']
+
+[privacy]
+  [privacy.youtube]
+    privacyEnhanced = true
+  [privacy.x]
+    enableDNT = true
+  [privacy.googleAnalytics]
+    anonymizeIP = true
+    respectDoNotTrack = true
+
+ 
