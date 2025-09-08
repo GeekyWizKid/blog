@@ -15,3 +15,15 @@
     <script defer src="/_vercel/speed-insights/script.js"></script>
   {{ end }}
 {{ end }}
+
+{{/* Custom favicons generated from assets/images/avatar.png (fallback if standard /favicon-*.png not provided) */}}
+{{ $avatar := resources.Get "images/avatar.png" }}
+{{ if $avatar }}
+  {{ $ico16 := $avatar.Fit "16x16" | resources.Fingerprint (site.Params.fingerprintAlgorithm | default "sha512") }}
+  {{ $ico32 := $avatar.Fit "32x32" | resources.Fingerprint (site.Params.fingerprintAlgorithm | default "sha512") }}
+  {{ $apple := $avatar.Fit "180x180" | resources.Fingerprint (site.Params.fingerprintAlgorithm | default "sha512") }}
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ $ico16.RelPermalink }}" integrity="{{ $ico16.Data.Integrity }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ $ico32.RelPermalink }}" integrity="{{ $ico32.Data.Integrity }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ $apple.RelPermalink }}" integrity="{{ $apple.Data.Integrity }}">
+  <link rel="shortcut icon" href="{{ $ico32.RelPermalink }}" integrity="{{ $ico32.Data.Integrity }}">
+{{ end }}
