@@ -1,1 +1,17 @@
 <link rel="stylesheet" href="/css/custom.css">
+
+{{/* Vercel Web Analytics / Speed Insights (optional) */}}
+{{ with .Params.vercelAnalytics }}
+  {{ if .enabled }}
+    <script defer src="/_vercel/insights/script.js"></script>
+    <script>
+      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments) }
+    </script>
+  {{ end }}
+{{ end }}
+
+{{ with .Params.vercelSpeedInsights }}
+  {{ if .enabled }}
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+  {{ end }}
+{{ end }}

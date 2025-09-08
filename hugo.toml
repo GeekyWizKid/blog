@@ -199,6 +199,14 @@ disableLanguages = ['en']
   taxonomy = ['html']
   term = ['html', 'rss']
 
+# Vercel Analytics (optional). Enable after turning on in Vercel dashboard.
+[params.vercelAnalytics]
+  enabled = true
+
+# Vercel Speed Insights (optional)
+[params.vercelSpeedInsights]
+  enabled = true
+
 [outputFormats]
   [outputFormats.RSS]
     baseName = 'feed'
