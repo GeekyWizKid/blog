@@ -207,6 +207,9 @@ disableLanguages = ['en']
 [params.vercelSpeedInsights]
   enabled = true
 
+[params.analyticsWidget]
+  enabled = true
+
 [outputFormats]
   [outputFormats.RSS]
     baseName = 'feed'
