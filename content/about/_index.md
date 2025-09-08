@@ -24,3 +24,10 @@ description: 温州程序员劝退师 / AI Agents · LLM 工具链 · 分布式
 - GitHub：<https://github.com/GeekyWizKid>
 - X：<https://x.com/named_Das>
 
+## 微信联系 {#wechat}
+
+扫描二维码添加（请备注“来自博客”）：
+
+![微信二维码](/images/wechat-qr.jpg)
+
+如果二维码过期，直接搜微信备注“劝退师说”，我会回你最新名片。

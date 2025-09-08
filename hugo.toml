@@ -44,7 +44,8 @@ disableLanguages = ['en']
   image = '/images/avatar.png'
   links = [
     { github = 'https://github.com/GeekyWizKid' },
-    { x-twitter = 'https://x.com/named_Das' }
+    { x-twitter = 'https://x.com/named_Das' },
+    { wechat = '/about/#wechat' }
   ]
 
 [params.header]
