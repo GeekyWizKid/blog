@@ -5,6 +5,7 @@ defaultContentLanguage = 'zh-cn'
 pagination = { pagerSize = 10 }
 enableRobotsTXT = true
 hasCJKLanguage = true
+rssURI = 'feed.xml'
 mainSections = ['tech', 'life', 'books']
 summaryLength = 36
 disableLanguages = ['en']
@@ -196,6 +197,10 @@ disableLanguages = ['en']
   section = ['html', 'rss']
   taxonomy = ['html']
   term = ['html', 'rss']
+
+[outputFormats]
+  [outputFormats.RSS]
+    baseName = 'feed'
 
 [privacy]
   [privacy.youtube]
