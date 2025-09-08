@@ -217,7 +217,7 @@ disableLanguages = ['en']
   provider = 'twikoo'           # twikoo | waline | artalk | giscus
   [params.comments.twikoo]
     envId = ''                  # 云开发部署：envId，如 tk-xxxxx（与 serverURL 二选一）
-    serverURL = 'http://twikoo.chixitown.com/'              # Vercel/自建部署：如 https://twikoo-xxxx.vercel.app
+    serverURL = 'https://twikoo.chixitown.com'              # Vercel/自建部署：如 https://twikoo-xxxx.vercel.app
     region = 'ap-shanghai'      # 可选
   [params.comments.waline]
     serverURL = ''              # 你的 Waline 服务端 URL，例如 https://comment.example.com
