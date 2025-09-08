@@ -15,31 +15,3 @@
     <script defer src="/_vercel/speed-insights/script.js"></script>
   {{ end }}
 {{ end }}
-
-{{/* Lightweight on-page analytics widget (calls /api/va-summary) */}}
-{{ with .Params.analyticsWidget }}
-  {{ if .enabled }}
-    <script>
-      (function(){
-        function $(q){return document.querySelector(q)}
-        function mount(data){
-          try{
-            var box=document.createElement('div');
-            box.id='va-mini';
-            box.style.cssText='position:fixed;right:12px;bottom:12px;z-index:60;padding:6px 10px;border-radius:8px;background:rgba(0,0,0,.6);color:#fff;font:12px/1.4 ui-sans-serif,system-ui;backdrop-filter:saturate(150%) blur(6px)';
-            var pv=data.pageviews??'–',vs=data.visits??'–';
-            box.innerHTML='7d Visits '+vs+' · PV '+pv;
-            document.body.appendChild(box);
-          }catch(_){/* no-op */}
-        }
-        function load(){
-          fetch('/api/va-summary', {credentials:'omit'})
-            .then(function(r){if(!r.ok)throw new Error(r.status);return r.json()})
-            .then(mount)
-            .catch(function(){/* silent */});
-        }
-        if (document.readyState==='complete') load(); else window.addEventListener('load', load, {once:true});
-      })();
-    </script>
-  {{ end }}
-{{ end }}

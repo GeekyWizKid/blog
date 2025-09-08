@@ -89,7 +89,8 @@ disableLanguages = ['en']
   showTaxonomies = true
   showAuthorsBadges = false
   showWordCount = false
-  sharingLinks = ['wechat','weibo','twitter','telegram','email']
+  # Valid options: 'bluesky','email','facebook','line','linkedin','mastodon','pinterest','reddit','telegram','twitter','whatsapp'
+  sharingLinks = ['twitter','telegram']
   showZenMode = true
 
 [params.list]
@@ -207,8 +208,6 @@ disableLanguages = ['en']
 [params.vercelSpeedInsights]
   enabled = true
 
-[params.analyticsWidget]
-  enabled = true
 
 [outputFormats]
   [outputFormats.RSS]
