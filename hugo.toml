@@ -215,8 +215,9 @@ disableLanguages = ['en']
 
 [params.comments]
   provider = 'twikoo'           # twikoo | waline | artalk | giscus
+  lazyLoad = false              # true: 懒加载评论（滚动到评论区才初始化）; false: DOMContentLoaded 初始化
   [params.comments.twikoo]
-    envId = ''                  # 云开发部署：envId，如 tk-xxxxx（与 serverURL 二选一）
+    envId = 'https://twikoo.chixitown.com'
     serverURL = 'https://twikoo.chixitown.com'              # Vercel/自建部署：如 https://twikoo-xxxx.vercel.app
     region = 'ap-shanghai'      # 可选
   [params.comments.waline]

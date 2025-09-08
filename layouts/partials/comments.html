@@ -8,25 +8,85 @@
 {{- if eq $provider "twikoo" -}}
   {{- $cfg := $p.comments.twikoo -}}
   {{- if or $cfg.envId $cfg.serverURL -}}
+    {{- /* Normalize Twikoo config: envId for both CloudBase and Vercel/self-host */ -}}
+    {{- $tkEnvId := (or $cfg.envId $cfg.serverURL) -}}
+    {{- $tkRegion := ($cfg.region | default "ap-shanghai") -}}
+    {{- $useRegion := (and $cfg.envId (not (hasPrefix $cfg.envId "http"))) -}}
     <div id="tcomment"></div>
-    <script src="https://cdn.staticfile.org/twikoo/1.6.44/twikoo.all.min.js"></script>
     <script>
       (function(){
-        if (window.__TWIKOO_INIT__) return; // 防止重复初始化
-        window.__TWIKOO_INIT__ = true;
-        function start(){
-          var cfg = { el: '#tcomment', path: '{{ .RelPermalink }}' };
-          {{- if $cfg.envId }} cfg.envId = '{{ $cfg.envId }}'; cfg.region = '{{ $cfg.region | default "ap-shanghai" }}'; {{ end -}}
-          {{- if $cfg.serverURL }} cfg.serverURL = '{{ $cfg.serverURL }}'; {{ end -}}
-          try {
-            if (!window.twikoo) { console.warn('Twikoo not loaded'); return; }
-            twikoo.init(cfg).catch(function(e){ console.error('Twikoo init failed:', e); });
-          } catch (e) {
-            console.error('Twikoo init exception:', e);
-          }
+        var CDN_PRIMARY = 'https://cdn.staticfile.org/twikoo/1.6.44/twikoo.all.min.js';
+        var CDN_FALLBACK = 'https://cdn.jsdelivr.net/npm/twikoo@1.6.44/dist/twikoo.all.min.js';
+
+        function loadScript(url, onload, onerror) {
+          var s = document.createElement('script');
+          s.src = url;
+          s.async = true;
+          s.crossOrigin = 'anonymous';
+          s.onload = onload;
+          s.onerror = onerror;
+          (document.head || document.documentElement).appendChild(s);
         }
-        if (document.readyState === 'complete') start();
-        else window.addEventListener('load', start, { once: true });
+
+        function ensureTwikooReady(done) {
+          if (window.twikoo) return done();
+          var triedFallback = false;
+          var timeout = setTimeout(function(){
+            if (!window.twikoo && !triedFallback) {
+              triedFallback = true;
+              loadScript(CDN_FALLBACK, function(){ done(); }, function(){ console.error('Twikoo CDN fallback failed'); });
+            }
+          }, 4000);
+          loadScript(CDN_PRIMARY, function(){ clearTimeout(timeout); done(); }, function(){
+            clearTimeout(timeout);
+            if (!triedFallback) {
+              triedFallback = true;
+              loadScript(CDN_FALLBACK, function(){ done(); }, function(){ console.error('Twikoo CDN fallback failed'); });
+            }
+          });
+        }
+
+        function initTwikoo(){
+          if (window.__TWIKOO_INIT__) return; // 防止重复初始化
+          window.__TWIKOO_INIT__ = true;
+          var cfg = { el: '#tcomment', path: '{{ .RelPermalink }}' };
+          cfg.envId = '{{ $tkEnvId }}';
+          {{- if $useRegion }} cfg.region = '{{ $tkRegion }}'; {{- end -}}
+          function start(){
+            try {
+              if (!window.twikoo) { console.warn('Twikoo not loaded yet'); return; }
+              twikoo.init(cfg).catch(function(e){ console.error('Twikoo init failed:', e); });
+            } catch (e) {
+              console.error('Twikoo init exception:', e);
+            }
+          }
+          if (window.twikoo) start(); else ensureTwikooReady(start);
+        }
+
+        function runWhenReady(fn){
+          if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, { once: true });
+          else fn();
+        }
+
+        // 根据配置选择初始化时机：lazyLoad=true 使用 IntersectionObserver 懒加载，否则文档就绪后立即初始化
+        var lazy = {{ with $p.comments.lazyLoad }}{{ . }}{{ else }}false{{ end }};
+        if (lazy && 'IntersectionObserver' in window) {
+          var el = document.getElementById('tcomment');
+          if (el) {
+            var io = new IntersectionObserver(function(entries){
+              for (var i=0;i<entries.length;i++){
+                if (entries[i].isIntersecting){ io.disconnect(); initTwikoo(); break; }
+              }
+            }, { rootMargin: '0px 0px 200px 0px', threshold: 0.01 });
+            io.observe(el);
+          } else {
+            runWhenReady(initTwikoo);
+          }
+        } else {
+          // 保险：既注册 DOMContentLoaded，又立即尝试一次（通常此处 DOM 已包含 #tcomment）。
+          runWhenReady(initTwikoo);
+          try { initTwikoo(); } catch(e) { /* ignore */ }
+        }
       })();
     </script>
   {{- else -}}
