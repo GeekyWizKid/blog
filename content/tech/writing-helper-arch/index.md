@@ -1,200 +1,156 @@
 ---
-title: 写作助手 writing-helper 架构笔记（多模型、流式、低延迟）
+title: writing-helper 深度解析：Next.js 15 流式多提供商写作助手（SSE + 统一代理）
 date: 2025-09-07
-tags: [LLM, Next.js, Edge, Streaming]
+tags: [LLM, Next.js, Streaming, SSE, Proxy]
 categories: [技术]
 draft: false
 # Use the correct param name `featureimage` and a direct Unsplash image URL
 featureimage: https://images.unsplash.com/photo-1752440284390-26d0527bbb9f?auto=format&fit=crop&w=1600&q=80
 ---
 
-这篇文章系统记录 writing-helper 的核心设计：如何在“多模型可替换、端到端低延迟、逐字流式”的约束下，把“写作助手”做成真正可用的生产组件。
+这篇文章基于源码实读，对 writing-helper 的架构与实现做“工程级”解析：如何在 Next.js 15 下，用统一代理层把 OpenAI / Grok / DeepSeek / Ollama 等提供商整合进一套流式（SSE）写作体验，并兼顾 CORS、安全与可用性。
 
 本项目地址： [writing-helper](https://github.com/GeekyWizKid/writing-helper)
 
 <!--more-->
 
-**目标与约束**
-- 低延迟：TTFB < 150ms，首段 1s 内到达，整段流式输出；
-- 多模型：OpenAI / Anthropic / Google / 本地大模型 可热切换，统一协议；
-- 高可用：降级与回退（fallback）、超时保护、断路器；
-- 可控风格：语气/结构/长度可配置，输出结构化；
-- 经济可控：按 token 成本预算路由，缓存热门请求。
+## 0. 项目概览
 
-**架构概览**
+- 技术栈：Next.js 15（App Router）、TypeScript、Tailwind、Turbopack
+- 关键模块：
+  - 流式代理：`src/app/api/stream-proxy/route.ts`
+  - 普通代理：`src/app/api/proxy/route.ts`
+  - 前端 API 客户端：`src/app/lib/api.ts`
+  - API Key 管理：`src/app/lib/secureApiKey.ts`
+  - 流式展示：`src/app/components/StreamingContent.tsx`
+
+## 1. 目标与约束
+
+- 低延迟：TTFB 小于百毫秒，首段 1s 内到达，整段逐字流式；
+- 多提供商：OpenAI / xAI Grok / DeepSeek / Ollama 等统一接入，不改前端；
+- 可用性：超时/断开可恢复，统一错误语义；
+- 安全：Origin 白名单 + API Key 本地加密存储；
+- 可维护：日志可读，问题定位简单。
+
+## 2. 架构总览
+
 ```
-Editor ──SSE──> Edge Route (Auth/参数/限流)
+Editor ──SSE──> /api/stream-proxy（CORS/映射/超时）
                   │
-                  └──RPC──> Node Router (路由/并发/超时/熔断)
-                                 │
-                                 ├─ Provider(OpenAI)
-                                 ├─ Provider(Anthropic)
-                                 ├─ Provider(Gemini)
-                                 └─ Provider(Local/Serverless)
-                              ↘  Cache/Quota/Tracing
+                  └──fetch──> 各家 API（OpenAI/Grok/DeepSeek/Ollama）
+                                │
+                                └─ 统一封装为 OpenAI Delta 事件
+Editor ──HTTP──> /api/proxy（直返 JSON、统一字段）
 ```
 
-## 1. Provider 抽象与路由
+## 3. 流式代理（SSE）：把不同厂商流统一成 OpenAI Delta
 
-统一签名只暴露“可迭代的流”，避免上层感知不同 SDK/协议差异：
+文件：`src/app/api/stream-proxy/route.ts:1`
 
-```ts
-export type ChatMessage = { role: 'system'|'user'|'assistant', content: string }
-export type Stream<T> = AsyncIterable<T>
+关键点：
+- CORS 白名单通过 `ALLOWED_ORIGINS` 环境变量控制；OPTIONS/POST 都设置 `Access-Control-Allow-*`。
+- 将请求体规范化为“流式”格式：非 Ollama 直接 `{...body, stream:true}`；Ollama 重写为 `/api/generate` 且构造 `{model,prompt,system,stream}`。
+- IPv6/localhost 兼容：`localhost` → `127.0.0.1`。
+- 读取上游响应流，逐行拆包并转译：
+  - Ollama：把 `{response, done}` 转换为 OpenAI 的 `chat.completion.chunk` 事件，结束时注入 `[DONE]`。
+  - OpenAI 兼容：识别 `data: {json}` / `[DONE]` 并透传。
 
-export interface ChatOptions {
-  model?: string
-  timeoutMs?: number
-  maxTokens?: number
-  temperature?: number
-  meta?: Record<string, string>
-}
-
-export interface Provider {
-  name: string
-  costPer1kTokens: number
-  supports: { images?: boolean; json?: boolean; tools?: boolean }
-  chat(messages: ChatMessage[], opt?: ChatOptions): Stream<string>
-}
-```
-
-路由策略样例：先按“预算/功能”筛选备选 Provider，再按健康度与历史 P95 延迟加权选择。
+片段：
 
 ```ts
-type Health = { p95: number; failureRate: number }
-
-export function pickProvider(
-  providers: Provider[],
-  require: Partial<Provider['supports']>,
-  budget: number,
-  health: Map<string, Health>
-): Provider {
-  const candidates = providers
-    .filter(p => Object.entries(require).every(([k, v]) => !v || (p.supports as any)[k]))
-    .filter(p => p.costPer1kTokens <= budget)
-  candidates.sort((a, b) => (health.get(a.name)?.p95 ?? 9e9) - (health.get(b.name)?.p95 ?? 9e9))
-  return candidates[0] ?? providers[0]
-}
-```
-
-## 2. 真正的流式：端到端 SSE
-
-在边缘/Node 均保持“背压友好”的 Reader → Writer 管道：
-
-```ts
-// Edge Route (Next.js App Router)
-export async function POST(req: Request) {
-  const { messages, opt } = await req.json()
-  const provider = pickProvider(/*...*/)
-
-  const stream = new ReadableStream({
-    async start(controller) {
-      const encoder = new TextEncoder()
-      const start = Date.now()
-      try {
-        for await (const token of provider.chat(messages, opt)) {
-          // 以 SSE 事件传输，保持心跳
-          controller.enqueue(encoder.encode(`data: ${token}\n\n`))
+// src/app/api/stream-proxy/route.ts:112
+const stream = new ReadableStream({ async start(controller) {
+  const reader = response.body?.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+    for (const line of lines) {
+      const s = line.trim();
+      if (!s || s === 'data: [DONE]') continue;
+      if (isOllama) {
+        const o = JSON.parse(s);
+        if (o.response) {
+          const chunk = { object:'chat.completion.chunk', choices:[{ delta:{ content:o.response } }] };
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(chunk)}\n\n`));
         }
-        controller.enqueue(encoder.encode('event: done\n\n'))
-        controller.close()
-      } catch (e) {
-        controller.enqueue(encoder.encode(`event: error\ndata: ${String(e)}\n\n`))
-        controller.close()
-      } finally {
-        console.log('ttfb(ms)=', Date.now() - start)
+        if (o.done) controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+      } else if (s.startsWith('data: ')) {
+        const data = JSON.parse(s.slice(6));
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
       }
     }
-  })
-
-  return new Response(stream, {
-    headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache' }
-  })
-}
-```
-
-客户端渐显：
-
-```ts
-const res = await fetch('/api/generate', { method: 'POST', body })
-const reader = res.body!.getReader()
-const decoder = new TextDecoder()
-let buf = ''
-for (;;) {
-  const { value, done } = await reader.read()
-  if (done) break
-  buf += decoder.decode(value, { stream: true })
-  for (const line of buf.split('\n\n')) {
-    if (!line.startsWith('data: ')) continue
-    const token = line.slice(6)
-    editor.chain().insertContent(token).run()
   }
-}
+}})
 ```
 
-## 3. Prompt 工程与可复用模板
+## 4. 普通代理：统一非流式 JSON 响应
 
-把“结构/语气/引用”抽象为参数，生成“半结构化提示”：
+文件：`src/app/api/proxy/route.ts:1`
+
+关键点：
+- 同样的 CORS 白名单与 10 分钟 Abort 超时（Vercel 部署时 `maxDuration=60`）。
+- 对 Ollama，把非 `/api/generate` 的 URL 重写；解析返回的 `response/prompt_eval_count/eval_count`，再封装成 OpenAI `chat.completion` 统一结构。
+- 对非 Ollama，原样透传 JSON，同时设置 CORS 响应头。
+- 常见错误分支：超时（504）、连接失败（502，ECONNREFUSED）、一般错误（502）。
+
+## 5. 前端客户端：双模（流式/直返）+ Provider 自适应
+
+文件：`src/app/lib/api.ts:1`
+
+- Provider 检测：通过 URL 包含词判定 grok/xai、ollama/11434、deepseek，否则视作 OpenAI 兼容。
+- 流式：`generateContentStream()` 请求 `/api/stream-proxy`，解析 `data: {json}` 行，并把 `choices[0].delta.content` 片段推给 UI。
+- 非流式：`generateContent()` 请求 `/api/proxy`，对多种字段位尝试提取正文：`choices[0].message.content` / `message.content` / `content` / `output` / `response` / `text` / 纯字符串，尽量容错。
+- 另有“润色功能”与“简历生成”的同构实现（`polish*` / `resumeApi.ts`）。
 
 ```ts
-type Style = { tone: 'explainer'|'academic'|'news'; structure: 'pyramid'|'faq'|'outline'; cite?: boolean }
-
-export function buildPrompt(input: { topic: string; bullets?: string[] }, style: Style) {
-  return [
-    { role: 'system', content: `你是严谨的中文写作者，优先事实，其次文采。` },
-    { role: 'user', content: [
-        `主题: ${input.topic}`,
-        style.bullets ? `要点: ${style.bullets?.join('；')}` : '',
-        `输出: 使用 ${style.structure} 结构，段落短句，关键术语中文+英文。`,
-        style.cite ? `若引用数据, 给出链接 [标题](URL)` : ''
-      ].filter(Boolean).join('\n') }
-  ] as ChatMessage[]
-}
+// src/app/lib/api.ts（流式部分）
+const response = await fetch('/api/stream-proxy', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ targetUrl: llmApiUrl, headers, body: requestBody, isOllama })
+});
+// 逐行拆包、识别 [DONE]，把 delta.content 交给 onChunk
 ```
 
-## 4. 限流、重试与熔断
+## 6. UI：打字机 + 自动滚动 + 渲染 Markdown
 
-按 Provider 的 TPM（tokens per minute）进行漏桶限流，异常时指数退避并熔断：
+文件：`src/app/components/StreamingContent.tsx:1`
 
-```ts
-import pLimit from 'p-limit'
+- 新 token 到达时采用“差量打字机”动画（20ms/字符），减少抖动与 CPU 开销；
+- 自动滚动到底部；完成后关闭光标闪烁；
+- 使用 `react-markdown + remark-gfm` 渲染输出。
 
-const limit = pLimit(4) // 并发
+## 7. 安全：Origin 白名单 + Key 加密存储（客户端）
 
-async function withRetry<T>(f: () => Promise<T>, max = 3) {
-  let n = 0, lastErr: unknown
-  while (n++ < max) {
-    try { return await f() } catch (e) {
-      lastErr = e
-      await new Promise(r => setTimeout(r, 200 * 2 ** (n - 1)))
-    }
-  }
-  throw lastErr
-}
-```
+- CORS：两个 API Route 使用 `ALLOWED_ORIGINS`；如果传入 `origin` 不在白名单，则回退到白名单首个域名；
+- API Key 本地管理：`src/app/lib/secureApiKey.ts:1`
+  - 基于“浏览器指纹”生成 16 字节 key（UA/屏幕分辨率/时区）；
+  - XOR + base64 简单加密；sessionStorage 为主，可选 localStorage 记住 7 天；
+  - 过期自动清理；支持多 provider；提供安全提醒。
 
-## 5. 成本与缓存
+说明：这是“防君子不防小人”的浏览器端加密，主要目的避免明文落地与误泄露，更强需求请结合服务端 KMS。
 
-- 基于 Prompt+上下文 哈希的结果缓存，命中直接重放流（服务器端把 token 流录制为 NDJSON）；
-- 结合“语义缓存”（embedding 近似），对高度相似输入复用结论段落；
-- 在 Edge 记录每次请求的 token 用量、单价与估算成本，超预算路由到更便宜模型。
+## 8. 可靠性细节与可用性小招
 
-## 6. 监控与可观测
+- 超时与中断：两个路由都用 `AbortController` 做 10 分钟上游超时，Vercel 限额下 `maxDuration=60`，超时返回 504；
+- IPv4 强制：把 `localhost` 替换为 `127.0.0.1`，规避某些环境下 IPv6 解析/代理异常；
+- Ollama URL 归一：若传入不是 `/api/generate`，自动修正，减少用户配置心智；
+- 错误可读性：代理侧记录 `status + errorText`，前端展示精简消息；流模式中也会注入 error 事件为 UI 兜底。
 
-- 指标：TTFB、首 50 个 token 延迟、整流耗时、失败率、每 Provider 的 P50/P95、SSE 断流次数；
-- Trace：一次生成跨 Edge→Node→Provider 的分布式追踪，便于查抖动；
-- 日志脱敏：屏蔽 Access Token/用户私密输入。
+## 9. 可改进建议（Roadmap）
 
-## 7. 安全与合规
+- SSE 事件封装：为非 OpenAI 兼容流增加 `event: token` / `event: done`，减少前端解析分支；
+- 速率控制：在 `/api/stream-proxy` 增加 per-IP 简易限流，避免公共部署被滥用；
+- Content-Security-Policy：对外部脚本/连接做严格白名单（connect-src），配合 `ALLOWED_ORIGINS`；
+- 观测：在服务端为流建立基本指标（首 token 延迟/总时延/断流计数）；
+- 提示工程：把“写作风格 JSON”做成可持久化模板，附可视化编辑器。
 
-- 输入校验（长度、非法控制字符）；
-- 输出护栏（违禁词、URL 白名单、外链剔除）；
-- 审计与配额：每用户用量、最大并发与速率限制。
+---
 
-## 8. Roadmap
+结语：writing-helper 用“统一代理 + SSE”的方式把多提供商揉进一套顺手的创作体验里。上游差异被很好地在服务端抹平，前端只需专注“逐字渐显 + Markdown 渲染”。这是一套稳健、可扩展、可复用的最小可行架构。
 
-- 工具调用（检索/计算/翻译）统一抽象；
-- 协作写作：多人光标、段落锁；
-- 模板市场：风格与结构可分享。
-
-结语：把“低延迟流式 + 多提供商抽象 + 成本/健康路由”做好，写作助手才能从 Demo 变产品。

@@ -4,6 +4,7 @@ date: 2025-09-07
 tags: [FFmpeg, Whisper, Pipeline]
 categories: [技术]
 draft: false
+featureimage: https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1600&q=80
 ---
 
 项目地址：[video_processing_service](https://github.com/GeekyWizKid/video_processing_service)
