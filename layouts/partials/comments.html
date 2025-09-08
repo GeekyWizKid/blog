@@ -11,12 +11,19 @@
     <div id="tcomment"></div>
     <script src="https://cdn.staticfile.org/twikoo/1.6.44/twikoo.all.min.js"></script>
     <script>
-      twikoo.init({
-        el: '#tcomment',
-        {{- if $cfg.envId }} envId: '{{ $cfg.envId }}', region: '{{ $cfg.region | default "ap-shanghai" }}', {{ end -}}
-        {{- if $cfg.serverURL }} serverURL: '{{ $cfg.serverURL }}', {{ end -}}
-        path: '{{ .RelPermalink }}'
-      })
+      // Guard against multiple inits (some pages/components may render twice)
+      if (!window.__TWIKOO_INIT__) {
+        window.__TWIKOO_INIT__ = true
+        const cfg = {
+          el: '#tcomment',
+          path: '{{ .RelPermalink }}'
+        };
+        {{- if $cfg.envId }} cfg.envId = '{{ $cfg.envId }}'; cfg.region = '{{ $cfg.region | default "ap-shanghai" }}'; {{ end -}}
+        {{- if $cfg.serverURL }} cfg.serverURL = '{{ $cfg.serverURL }}'; {{ end -}}
+        twikoo.init(cfg).catch((e) => {
+          console.error('Twikoo init failed:', e)
+        })
+      }
     </script>
   {{- else -}}
     <div class="text-sm text-neutral-500">未配置 Twikoo。请在 hugo.toml 的 [params.comments.twikoo] 下设置 envId（云开发）或 serverURL（Vercel/自建）。</div>
