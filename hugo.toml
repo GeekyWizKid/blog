@@ -21,7 +21,7 @@ disableLanguages = ['en']
 
 [params]
   # Blowfish theme params
-  colorScheme = 'slate'            # calm neutral palette
+  colorScheme = 'ocean'            # calm blue palette with better contrast
   defaultAppearance = 'light'       # light | dark
   autoSwitchAppearance = true
   enableA11y = false
