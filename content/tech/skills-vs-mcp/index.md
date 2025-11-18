@@ -31,14 +31,14 @@ featureimage: https://images.unsplash.com/photo-1659698314782-fe80a44632b2?q=80&
 >MCP 是一种开放协议，旨在标准化应用程序向 LLMs 提供上下文的方式。
 >可以将 MCP 想象成 AI 应用的 USB-C 接口。正如 USB-C 为设备连接各种外设和配件提供了标准化方式，MCP 也为 AI 模型连接不同数据源和工具提供了标准化方法。
 
-![image|690x388](./3.png)
+![image3|690x388](./3.png)
 
 
 从两者的官方描述来看，Skills 提供的是一种更高层次的(抽象层面)，指导性的，团队共识性质的技能。普遍体现在工作流程性质，而 MCP 则是组成了原子“操作”。用程序员更熟悉的类比来说， Skills 提供的是 service 层面的流程抽象， MCP 提供的是 Utils 或者 Connector 级别的能力。这从两者的官图可以看出
 
-![image|690x433](./1.png)
+![image1|690x433](./1.png)
 
-![image|690x292](./2.png)
+![image2|690x292](./2.png)
 
 
 
