@@ -1,5 +1,5 @@
 ---
-title: 关于 MCP 和 SKILLS的一些思考
+title: MCP 被抛弃了吗？–- 关于 MCP 和 SKILLS 的一些思考
 date: 2025-11-18
 tags: [LLM, MCP, SKILLS, 技术]
 categories: [技术]
