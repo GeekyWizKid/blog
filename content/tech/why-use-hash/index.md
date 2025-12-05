@@ -1,5 +1,5 @@
 ---
-title: 为什么文件要添加一个 hash 后缀
+title: 为什么互联网上的文件要添加一个 hash 后缀
 date: 2025-12-04
 tags: [缓存, 构建, 技术]
 categories: [技术]
