@@ -1,0 +1,112 @@
+---
+title: 你知道Claude Code 一直在变化的状态词是什么意思吗？
+date: 2026-01-06
+tags: [ 探索, 技术,杂谈]
+categories: [技术]
+draft: false
+featureimage: https://images.unsplash.com/photo-1764771029641-d752673faec3?q=80&w=1172&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D
+---
+大家们是否有发现 Claude Code 在运行时会输出一些状态信息和操作描述，如果能看懂它们，编程的过程是否会更有意思？
+![image|690x257](upload://zYllVQcmBzCivnegmArwPw6n0jc.png)
+
+我在探索时发现了这些有意思的小东西，把单词发给 Claude 翻译了，贴出来给大家看看。
+词汇来源：[tengu_spinner_words](https://github.com/levindixon/tengu_spinner_words)
+> 内部代号：天狗 (Tengu)。这些词会在 Claude Code 处理任务时随机旋转显示，共 **90** 个。
+
+| 英文词汇 | 中文翻译 | 描述 |
+|---------|---------|------|
+| Accomplishing | 完成中 | 正在完成任务 |
+| Actioning | 行动中 | 正在执行操作 |
+| Actualizing | 实现中 | 正在将想法转化为现实 |
+| Baking | 烘焙中 | 像烤蛋糕一样酝酿代码 |
+| Booping | 轻触中 | 轻轻触碰代码 |
+| Brewing | 酿造中 | 像冲咖啡一样酝酿解决方案 |
+| Calculating | 计算中 | 正在进行数学计算 |
+| Cerebrating | 大脑运转中 | 使用大脑深度思考 |
+| Channelling | 引导中 | 引导能量和思维 |
+| Churning | 搅动中 | 像搅拌黄油一样处理代码 |
+| Clauding | 克劳德中 | 用 Claude 特有的方式工作 |
+| Coalescing | 融合中 | 将想法融合在一起 |
+| Cogitating | 沉思中 | 深度思考和考虑 |
+| Combobulating | 组合中 | 将各部分组合起来 (与 discombobulate 相反) |
+| Computing | 计算中 | 进行数字运算 |
+| Concocting | 调制中 | 像调配魔药一样创建解决方案 |
+| Conjuring | 施法中 | 像变魔术一样创造代码 |
+| Considering | 考虑中 | 仔细思考各种选项 |
+| Contemplating | 沉思中 | 深入冥想思考 |
+| Cooking | 烹饪中 | 像做菜一样准备代码 |
+| Crafting | 制作中 | 精心制作解决方案 |
+| Creating | 创造中 | 从无到有创建新东西 |
+| Crunching | 压榨中 | 处理大量数据 |
+| Deciphering | 破译中 | 解读复杂的代码 |
+| Deliberating | 审议中 | 仔细权衡各种方案 |
+| Determining | 确定中 | 做出决定 |
+| Discombobulating | 困惑中 | 在混乱中理清头绪 |
+| Divining | 占卜中 | 像预言家一样预测结果 |
+| Doing | 做事中 | 简单直接地在做事 |
+| Elucidating | 阐明中 | 让事情变得清晰 |
+| Enchanting | 施展魔法 | 给代码赋予魔力 |
+| Envisioning | 构想中 | 想象最终结果 |
+| Finagling | 巧妙处理 | 用技巧解决棘手问题 |
+| Flibbertigibbeting | 活泼思考 | 轻快跳跃的思维方式 |
+| Forging | 锻造中 | 像铁匠一样打造代码 |
+| Forming | 构思中 | 正在形成解决方案 |
+| Frolicking | 嬉戏中 | 快乐地处理代码 |
+| Generating | 生成中 | 生成新的内容 |
+| Germinating | 萌芽中 | 像种子一样孕育想法 |
+| Hatching | 孵化中 | 孵化新想法 |
+| Herding | 牧羊中 | 像牧羊人一样管理代码 |
+| Honking | 鸣笛中 | 发出响亮的信号 |
+| Hustling | 奋斗中 | 努力快速工作 |
+| Ideating | 构思中 | 产生新想法 |
+| Imagining | 想象中 | 发挥创造力 |
+| Incubating | 孵化中 | 培育想法成长 |
+| Inferring | 推断中 | 从现有信息推理 |
+| Jiving | 摇摆中 | 有节奏地工作 |
+| Manifesting | 显现中 | 让想法变为现实 |
+| Marinating | 腌制中 | 让想法慢慢入味 |
+| Meandering | 漫步中 | 曲折探索解决方案 |
+| Moseying | 闲逛中 | 悠闲地处理问题 |
+| Mulling | 琢磨中 | 反复思考 |
+| Mustering | 集结中 | 召集资源和想法 |
+| Musing | 沉思中 | 陷入深度思考 |
+| Noodling | 随意探索 | 自由地尝试各种想法 |
+| Percolating | 渗透中 | 像咖啡一样慢慢过滤想法 |
+| Perusing | 细读中 | 仔细阅读代码 |
+| Philosophising | 哲思中 | 从哲学角度思考 |
+| Pondering | 沉思中 | 深入思考问题 |
+| Pontificating | 发表意见 | 权威地表达观点 |
+| Processing | 处理中 | 正在处理信息 |
+| Puttering | 修修补补 | 做些小调整 |
+| Puzzling | 解谜中 | 解决复杂谜题 |
+| Reticulating | 编织中 | 构建网络结构 (《模拟人生》梗) |
+| Ruminating | 反刍中 | 像牛一样反复咀嚼想法 |
+| Scheming | 筹划中 | 制定策略计划 |
+| Schlepping | 费力搬运 | 辛苦地处理繁重任务 |
+| Shimmying | 摇晃中 | 灵活地移动 |
+| Shucking | 剥壳中 | 去除不必要的部分 |
+| Simmering | 炖煮中 | 慢慢煨炖想法 |
+| Smooshing | 压扁中 | 将东西挤在一起 |
+| Spelunking | 洞穴探险 | 深入探索代码库 |
+| Spinning | 旋转中 | 快速运转思维 |
+| Stewing | 炖煮中 | 慢慢酝酿解决方案 |
+| Sussing | 摸清中 | 弄清楚情况 |
+| Synthesizing | 综合中 | 整合各种信息 |
+| Thinking | 思考中 | 正在思考 |
+| Tinkering | 修补中 | 进行小修小改 |
+| Transmuting | 转化中 | 像炼金术一样转化代码 |
+| Unfurling | 展开中 | 逐渐展现解决方案 |
+| Unravelling | 解开中 | 解开复杂的线团 |
+| Vibing | 感受中 | 感受代码的氛围 |
+| Wandering | 漫游中 | 在代码中漫游探索 |
+| Whirring | 嗡嗡运转 | 像机器一样高速运转 |
+| Wibbling | 摇摆中 | 轻微摇摆晃动 |
+
+## 一些小彩蛋，Claude 提供的
+
+- **Tengu (天狗)** 是 Claude Code 的内部代号，来自日本民间传说中聪明狡黠的神话生物
+- **Reticulating** 是《模拟人生》系列游戏加载画面的经典梗："Reticulating splines"（编织样条曲线）
+- **Schlepping** 来自意第绪语，意为"费力地拖着重物走"
+- **Flibbertigibbeting** 是列表中最长的单词，源自古英语，形容轻浮活泼的状态
+- **Clauding** 是专为 Claude 创造的独特动词
+- **Booping** 来自网络文化中"boop the snoop"（轻触鼻子）的可爱梗
