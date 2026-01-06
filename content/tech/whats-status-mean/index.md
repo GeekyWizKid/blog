@@ -7,7 +7,7 @@ draft: false
 featureimage: https://images.unsplash.com/photo-1761839258289-72f12b0de058?q=80&w=3270&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D
 ---
 大家们是否有发现 Claude Code 在运行时会输出一些状态信息和操作描述，如果能看懂它们，编程的过程是否会更有意思？
-![image|690x257](upload://zYllVQcmBzCivnegmArwPw6n0jc.png)
+![image|690x257](./image.png)
 
 我在探索时发现了这些有意思的小东西，把单词发给 Claude 翻译了，贴出来给大家看看。
 词汇来源：[tengu_spinner_words](https://github.com/levindixon/tengu_spinner_words)
