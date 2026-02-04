@@ -1,0 +1,155 @@
+---
+export interface Props {
+  path?: string;
+}
+
+const { path = Astro.url.pathname } = Astro.props;
+const envId = 'https://twikoo.chixitown.com';
+---
+
+<div class="comments-section">
+  <h2 class="comments-title">评论</h2>
+  <div id="twikoo-comments"></div>
+</div>
+
+<script define:vars={{ envId, path }}>
+  function initTwikoo() {
+    if (typeof twikoo === 'undefined') {
+      setTimeout(initTwikoo, 100);
+      return;
+    }
+    twikoo.init({
+      envId: envId,
+      el: '#twikoo-comments',
+      path: path,
+      lang: 'zh-CN',
+    });
+  }
+
+  // 加载 Twikoo 脚本
+  if (!document.getElementById('twikoo-script')) {
+    const script = document.createElement('script');
+    script.id = 'twikoo-script';
+    script.src = 'https://cdn.jsdelivr.net/npm/twikoo@1.6.39/dist/twikoo.all.min.js';
+    script.onload = initTwikoo;
+    document.head.appendChild(script);
+  } else {
+    initTwikoo();
+  }
+</script>
+
+<style>
+  .comments-section {
+    margin-top: var(--space-16);
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .comments-title {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-muted);
+    margin: 0 0 var(--space-8);
+  }
+
+  /* Twikoo 样式覆盖 - Editorial 风格 */
+  #twikoo-comments {
+    --twikoo-main-color: var(--color-text);
+    --twikoo-sub-color: var(--color-text-secondary);
+    --twikoo-divider-color: var(--color-border);
+  }
+
+  :global(.tk-comments) {
+    font-family: var(--font-sans) !important;
+  }
+
+  :global(.tk-submit .tk-row) {
+    margin-bottom: var(--space-4);
+  }
+
+  :global(.tk-input) {
+    font-family: var(--font-sans) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: 0 !important;
+    background: var(--color-bg-secondary) !important;
+    color: var(--color-text) !important;
+    padding: var(--space-3) var(--space-4) !important;
+  }
+
+  :global(.tk-input:focus) {
+    border-color: var(--color-text) !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  :global(.tk-submit .tk-submit-action-btn) {
+    font-family: var(--font-sans) !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    background: var(--color-text) !important;
+    color: var(--color-bg) !important;
+    border: 1px solid var(--color-text) !important;
+    border-radius: 0 !important;
+    padding: var(--space-3) var(--space-6) !important;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  :global(.tk-submit .tk-submit-action-btn:hover) {
+    background: transparent !important;
+    color: var(--color-text) !important;
+  }
+
+  :global(.tk-comment) {
+    border-bottom: 1px solid var(--color-border) !important;
+    padding: var(--space-6) 0 !important;
+  }
+
+  :global(.tk-nick) {
+    font-weight: 500 !important;
+    color: var(--color-text) !important;
+  }
+
+  :global(.tk-time) {
+    font-size: 0.75rem !important;
+    color: var(--color-text-muted) !important;
+  }
+
+  :global(.tk-content) {
+    color: var(--color-text-secondary) !important;
+    line-height: 1.7 !important;
+  }
+
+  :global(.tk-avatar) {
+    border-radius: 0 !important;
+    border: 1px solid var(--color-border) !important;
+  }
+
+  :global(.tk-action-icon) {
+    color: var(--color-text-muted) !important;
+  }
+
+  :global(.tk-action-icon:hover) {
+    color: var(--color-text) !important;
+  }
+
+  /* 深色模式适配 */
+  :global([data-theme="dark"] .tk-input) {
+    background: var(--color-bg-muted) !important;
+  }
+
+  :global([data-theme="dark"] .tk-submit .tk-submit-action-btn) {
+    background: var(--color-text) !important;
+    color: var(--color-bg) !important;
+  }
+
+  :global([data-theme="dark"] .tk-submit .tk-submit-action-btn:hover) {
+    background: transparent !important;
+    color: var(--color-text) !important;
+  }
+</style>

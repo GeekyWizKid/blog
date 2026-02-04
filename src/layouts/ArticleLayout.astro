@@ -1,0 +1,318 @@
+---
+export interface Props {
+  title: string;
+  description?: string;
+  date: Date;
+  updated?: Date;
+  tags?: string[];
+  image?: string;
+}
+
+import BaseLayout from './BaseLayout.astro';
+import Comments from '../components/Comments.astro';
+
+const { title, description, date, updated, tags = [], image } = Astro.props;
+
+const formattedDate = date.toLocaleDateString('zh-CN', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+
+const formattedUpdated = updated?.toLocaleDateString('zh-CN', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+});
+---
+
+<BaseLayout title={title} description={description} image={image}>
+  <article class="article">
+    <header class="article-header">
+      <div class="article-meta">
+        <time datetime={date.toISOString()}>{formattedDate}</time>
+        {updated && (
+          <span class="updated">· 更新于 {formattedUpdated}</span>
+        )}
+      </div>
+
+      <h1 class="article-title">{title}</h1>
+
+      {description && (
+        <p class="article-description">{description}</p>
+      )}
+
+      {tags.length > 0 && (
+        <div class="article-tags">
+          {tags.map(tag => (
+            <a href={`/tags/${tag}/`} class="tag">{tag}</a>
+          ))}
+        </div>
+      )}
+    </header>
+
+    <div class="article-content prose">
+      <slot />
+    </div>
+
+    <Comments />
+
+    <footer class="article-footer">
+      <div class="share-section">
+        <span class="share-label">分享文章</span>
+        <div class="share-buttons">
+          <a
+            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${Astro.url}`}
+            target="_blank"
+            rel="noopener"
+            class="share-btn"
+          >
+            Twitter
+          </a>
+          <button class="share-btn" id="copy-link">
+            复制链接
+          </button>
+        </div>
+      </div>
+
+      <nav class="article-nav">
+        <a href="/" class="nav-link">← 返回首页</a>
+      </nav>
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .article {
+    max-width: var(--content-width);
+    margin: 0 auto;
+  }
+
+  .article-header {
+    text-align: center;
+    margin-bottom: var(--space-12);
+    padding-bottom: var(--space-8);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .article-meta {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-4);
+  }
+
+  .updated {
+    color: var(--color-text-muted);
+  }
+
+  .article-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin: 0 0 var(--space-6);
+  }
+
+  .article-description {
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    margin: 0 0 var(--space-6);
+  }
+
+  .article-tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2);
+  }
+
+  .tag {
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: var(--space-1) var(--space-3);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .tag:hover {
+    border-color: var(--color-text);
+    color: var(--color-text);
+  }
+
+  /* Article Content */
+  .article-content {
+    font-size: 1.125rem;
+    line-height: 1.9;
+  }
+
+  .article-content :global(h2) {
+    font-family: var(--font-serif);
+    font-size: 1.75rem;
+    font-weight: 400;
+    margin: var(--space-12) 0 var(--space-4);
+  }
+
+  .article-content :global(h3) {
+    font-family: var(--font-serif);
+    font-size: 1.375rem;
+    font-weight: 400;
+    margin: var(--space-8) 0 var(--space-3);
+  }
+
+  .article-content :global(p) {
+    margin: var(--space-4) 0;
+    color: var(--color-text-secondary);
+  }
+
+  .article-content :global(a) {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-decoration-color: var(--color-border-dark);
+    text-underline-offset: 3px;
+  }
+
+  .article-content :global(a:hover) {
+    text-decoration-color: var(--color-accent);
+  }
+
+  .article-content :global(blockquote) {
+    border-left: 2px solid var(--color-border-dark);
+    padding: var(--space-2) var(--space-6);
+    margin: var(--space-8) 0;
+  }
+
+  .article-content :global(blockquote p) {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 1.25rem;
+    line-height: 1.7;
+  }
+
+  .article-content :global(pre) {
+    background: #1a1a1a;
+    color: #e5e5e5;
+    border: 1px solid var(--color-border);
+    padding: var(--space-6);
+    overflow-x: auto;
+    margin: var(--space-6) 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+
+  .article-content :global(code) {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+  }
+
+  .article-content :global(:not(pre) > code) {
+    background: var(--color-bg-muted);
+    padding: 0.15rem 0.4rem;
+  }
+
+  .article-content :global(img) {
+    max-width: 100%;
+    height: auto;
+    margin: var(--space-8) 0;
+  }
+
+  .article-content :global(ul),
+  .article-content :global(ol) {
+    padding-left: var(--space-6);
+    margin: var(--space-4) 0;
+  }
+
+  .article-content :global(li) {
+    margin: var(--space-2) 0;
+    color: var(--color-text-secondary);
+  }
+
+  .article-content :global(hr) {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: var(--space-12) 0;
+  }
+
+  /* Article Footer */
+  .article-footer {
+    margin-top: var(--space-16);
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .share-section {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
+  }
+
+  .share-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-muted);
+  }
+
+  .share-buttons {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .share-btn {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: var(--space-2) var(--space-4);
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .share-btn:hover {
+    border-color: var(--color-text);
+    color: var(--color-text);
+  }
+
+  .article-nav {
+    display: flex;
+    justify-content: center;
+  }
+
+  .nav-link {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .nav-link:hover {
+    color: var(--color-text);
+  }
+</style>
+
+<script>
+  document.getElementById('copy-link')?.addEventListener('click', async () => {
+    await navigator.clipboard.writeText(window.location.href);
+    const btn = document.getElementById('copy-link');
+    if (btn) {
+      const original = btn.textContent;
+      btn.textContent = '已复制!';
+      setTimeout(() => { btn.textContent = original; }, 2000);
+    }
+  });
+</script>

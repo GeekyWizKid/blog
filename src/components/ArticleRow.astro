@@ -1,0 +1,78 @@
+---
+export interface Props {
+  title: string;
+  description?: string;
+  date: Date;
+  href: string;
+}
+
+const { title, description, date, href } = Astro.props;
+
+const formattedDate = date.toLocaleDateString('zh-CN', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit'
+});
+---
+
+<article class="article-row">
+  <time datetime={date.toISOString()} class="row-date">
+    {formattedDate}
+  </time>
+  <div class="row-content">
+    <a href={href} class="row-link">
+      <h3 class="row-title">{title}</h3>
+    </a>
+    {description && (
+      <p class="row-description">{description}</p>
+    )}
+  </div>
+</article>
+
+<style>
+  .article-row {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: var(--space-6);
+    padding: var(--space-6) 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  @media (max-width: 640px) {
+    .article-row {
+      grid-template-columns: 1fr;
+      gap: var(--space-2);
+    }
+  }
+
+  .row-date {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+    padding-top: 0.25rem;
+  }
+
+  .row-link {
+    text-decoration: none;
+  }
+
+  .row-title {
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--color-text);
+    margin: 0;
+    transition: color 0.2s ease;
+  }
+
+  .row-link:hover .row-title {
+    color: var(--color-accent);
+  }
+
+  .row-description {
+    font-size: 0.9375rem;
+    color: var(--color-text-secondary);
+    margin: var(--space-2) 0 0;
+    line-height: 1.6;
+  }
+</style>

@@ -1,0 +1,98 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleRow from '../components/ArticleRow.astro';
+
+// Get all posts
+const techPosts = await getCollection('tech', ({ data }) => !data.draft);
+const lifePosts = await getCollection('life', ({ data }) => !data.draft);
+const bookPosts = await getCollection('books', ({ data }) => !data.draft);
+
+const allPosts = [...techPosts, ...lifePosts, ...bookPosts]
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+// Group by year
+const postsByYear = allPosts.reduce((acc, post) => {
+  const year = post.data.date.getFullYear();
+  if (!acc[year]) acc[year] = [];
+  acc[year].push(post);
+  return acc;
+}, {} as Record<number, typeof allPosts>);
+
+const years = Object.keys(postsByYear).sort((a, b) => Number(b) - Number(a));
+---
+
+<BaseLayout title="归档" description="所有文章归档">
+  <div class="archive-page">
+    <header class="page-header">
+      <h1 class="page-title">归档</h1>
+      <p class="page-description">
+        共 {allPosts.length} 篇文章
+      </p>
+    </header>
+
+    <div class="archive-list">
+      {years.map(year => (
+        <section class="year-section">
+          <h2 class="year-title">{year}</h2>
+          <div class="year-posts">
+            {postsByYear[Number(year)].map(post => (
+              <ArticleRow
+                title={post.data.title}
+                description={post.data.description}
+                date={post.data.date}
+                href={`/${post.collection}/${post.slug}/`}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .archive-page {
+    max-width: var(--content-width);
+    margin: 0 auto;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: var(--space-12);
+    padding-bottom: var(--space-8);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .page-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 400;
+    margin: 0 0 var(--space-4);
+  }
+
+  .page-description {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .year-section {
+    margin-bottom: var(--space-12);
+  }
+
+  .year-title {
+    font-family: var(--font-serif);
+    font-size: 2rem;
+    font-weight: 400;
+    color: var(--color-text);
+    margin: 0 0 var(--space-6);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .year-posts {
+    display: flex;
+    flex-direction: column;
+  }
+</style>

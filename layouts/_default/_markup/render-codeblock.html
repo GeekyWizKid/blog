@@ -1,6 +1,0 @@
-{{- $lang := .Type | lower -}}
-{{- if eq $lang "mermaid" -}}
-<div class="mermaid">{{- .Inner | safeHTML -}}</div>
-{{- else -}}
-{{- highlight .Inner $lang "" -}}
-{{- end -}}

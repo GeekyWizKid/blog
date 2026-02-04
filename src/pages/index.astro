@@ -1,0 +1,227 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import { getCollection } from 'astro:content';
+
+// Get all articles from all collections
+const techPosts = await getCollection('tech', ({ data }) => !data.draft);
+const lifePosts = await getCollection('life', ({ data }) => !data.draft);
+const bookPosts = await getCollection('books', ({ data }) => !data.draft);
+
+// Combine and sort by date
+const allPosts = [...techPosts, ...lifePosts, ...bookPosts]
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const featuredPost = allPosts.find(post => post.data.featured) || allPosts[0];
+const recentPosts = allPosts.filter(post => post !== featuredPost).slice(0, 8);
+---
+
+<BaseLayout title="首页">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <p class="hero-label">技术博客</p>
+      <h1 class="hero-title">劝退师说</h1>
+      <p class="hero-subtitle">
+        探索 AI Agents、LLM 工具链与分布式系统的技术实践
+      </p>
+    </div>
+  </section>
+
+  <!-- Featured Article -->
+  {featuredPost && (
+    <section class="section">
+      <header class="section-header">
+        <h2 class="section-title">精选文章</h2>
+      </header>
+      <ArticleCard
+        title={featuredPost.data.title}
+        description={featuredPost.data.description}
+        date={featuredPost.data.date}
+        href={`/${featuredPost.collection}/${featuredPost.slug}/`}
+        tags={featuredPost.data.tags}
+        featured={true}
+      />
+    </section>
+  )}
+
+  <!-- Recent Articles -->
+  <section class="section">
+    <header class="section-header">
+      <h2 class="section-title">最新文章</h2>
+      <a href="/archives/" class="section-link">查看全部</a>
+    </header>
+    <div class="article-grid">
+      {recentPosts.map(post => (
+        <ArticleCard
+          title={post.data.title}
+          description={post.data.description}
+          date={post.data.date}
+          href={`/${post.collection}/${post.slug}/`}
+          tags={post.data.tags}
+        />
+      ))}
+    </div>
+  </section>
+
+  <!-- Categories -->
+  <section class="section categories">
+    <header class="section-header">
+      <h2 class="section-title">分类浏览</h2>
+    </header>
+    <div class="category-grid">
+      <a href="/tech/" class="category-card">
+        <span class="category-name">技术</span>
+        <span class="category-count">{techPosts.length} 篇</span>
+      </a>
+      <a href="/life/" class="category-card">
+        <span class="category-name">日常</span>
+        <span class="category-count">{lifePosts.length} 篇</span>
+      </a>
+      <a href="/books/" class="category-card">
+        <span class="category-name">读书</span>
+        <span class="category-count">{bookPosts.length} 篇</span>
+      </a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Hero */
+  .hero {
+    text-align: center;
+    padding: var(--space-24) 0;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--space-16);
+  }
+
+  .hero-content {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .hero-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-4);
+  }
+
+  .hero-title {
+    font-family: var(--font-serif);
+    font-size: clamp(3rem, 8vw, 5rem);
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    margin: 0 0 var(--space-6);
+  }
+
+  .hero-subtitle {
+    font-size: 1.125rem;
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  /* Sections */
+  .section {
+    max-width: var(--max-width);
+    margin: 0 auto var(--space-16);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: var(--space-8);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .section-title {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .section-link {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .section-link:hover {
+    color: var(--color-text);
+  }
+
+  /* Article Grid */
+  .article-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 768px) {
+    .article-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-8);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .article-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* Categories */
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+  }
+
+  @media (max-width: 640px) {
+    .category-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .category-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-12) var(--space-8);
+    border: 1px solid var(--color-border);
+    text-decoration: none;
+    transition: border-color 0.2s ease;
+  }
+
+  .category-card:hover {
+    border-color: var(--color-text);
+  }
+
+  .category-name {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    color: var(--color-text);
+    margin-bottom: var(--space-2);
+  }
+
+  .category-count {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-muted);
+  }
+</style>

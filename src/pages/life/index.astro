@@ -1,0 +1,82 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+
+const posts = await getCollection('life', ({ data }) => !data.draft);
+const sortedPosts = posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<BaseLayout title="日常" description="日常生活记录与思考">
+  <div class="section-page">
+    <header class="page-header">
+      <h1 class="page-title">日常</h1>
+      <p class="page-description">
+        生活中的点滴记录与随想
+      </p>
+    </header>
+
+    <div class="article-grid">
+      {sortedPosts.map(post => (
+        <ArticleCard
+          title={post.data.title}
+          description={post.data.description}
+          date={post.data.date}
+          href={`/life/${post.slug}/`}
+          tags={post.data.tags}
+        />
+      ))}
+    </div>
+
+    {sortedPosts.length === 0 && (
+      <p class="empty-state">暂无文章</p>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .section-page {
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: var(--space-12);
+    padding-bottom: var(--space-8);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .page-title {
+    font-family: var(--font-serif);
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-weight: 400;
+    margin: 0 0 var(--space-4);
+  }
+
+  .page-description {
+    font-size: 1.125rem;
+    color: var(--color-text-secondary);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .article-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: var(--space-6);
+  }
+
+  @media (min-width: 768px) {
+    .article-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-8);
+    }
+  }
+
+  .empty-state {
+    text-align: center;
+    color: var(--color-text-muted);
+    padding: var(--space-16) 0;
+  }
+</style>
