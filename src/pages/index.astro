@@ -21,7 +21,7 @@ const recentPosts = allPosts.filter(post => post !== featuredPost).slice(0, 8);
   <section class="hero">
     <div class="hero-content">
       <p class="hero-label">技术博客</p>
-      <h1 class="hero-title">劝退师说</h1>
+      <h1 class="hero-title">劝退师<span class="hero-shuo">說</span></h1>
       <p class="hero-subtitle">
         探索 AI Agents、LLM 工具链与分布式系统的技术实践
       </p>
@@ -115,6 +115,14 @@ const recentPosts = allPosts.filter(post => post !== featuredPost).slice(0, 8);
     font-weight: 400;
     letter-spacing: -0.03em;
     margin: 0 0 var(--space-6);
+  }
+
+  .hero-shuo {
+    font-family: 'Zhi Mang Xing', cursive;
+    font-size: 1.15em;
+    margin-left: -0.05em;
+    position: relative;
+    top: -0.03em;
   }
 
   .hero-subtitle {

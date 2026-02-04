@@ -4,7 +4,7 @@
    ==================================== */
 
 /* === Font Imports === */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Noto+Serif+SC:wght@400;500;600;700&family=Zhi+Mang+Xing&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* === CSS Custom Properties === */
 :root {
@@ -22,7 +22,7 @@
   --color-accent: #dc2626;
 
   /* Typography */
-  --font-serif: 'Playfair Display', 'Noto Serif SC', 'Source Han Serif SC', Georgia, serif;
+  --font-serif: 'Cormorant Garamond', 'Noto Serif SC', 'Source Han Serif SC', Georgia, serif;
   --font-sans: 'Inter', 'Noto Sans SC', 'PingFang SC', -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
 
