@@ -13,8 +13,8 @@ const gamePosts = await getCollection('games', ({ data }) => !data.draft);
 const allPosts = [...techPosts, ...lifePosts, ...bookPosts, ...gamePosts]
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-const featuredPost = allPosts.find(post => post.data.featured) || allPosts[0];
-const recentPosts = allPosts.filter(post => post !== featuredPost).slice(0, 8);
+const featuredPosts = allPosts.filter(post => post.data.featured);
+const recentPosts = allPosts.filter(post => !post.data.featured).slice(0, 8);
 ---
 
 <BaseLayout title="首页">
@@ -29,20 +29,24 @@ const recentPosts = allPosts.filter(post => post !== featuredPost).slice(0, 8);
     </div>
   </section>
 
-  <!-- Featured Article -->
-  {featuredPost && (
+  <!-- Featured Articles -->
+  {featuredPosts.length > 0 && (
     <section class="section">
       <header class="section-header">
         <h2 class="section-title">精选文章</h2>
       </header>
-      <ArticleCard
-        title={featuredPost.data.title}
-        description={featuredPost.data.description}
-        date={featuredPost.data.date}
-        href={`/${featuredPost.collection}/${featuredPost.slug}/`}
-        tags={featuredPost.data.tags}
-        featured={true}
-      />
+      <div class="article-grid">
+        {featuredPosts.map(post => (
+          <ArticleCard
+            title={post.data.title}
+            description={post.data.description}
+            date={post.data.date}
+            href={`/${post.collection}/${post.slug}/`}
+            tags={post.data.tags}
+            featured={true}
+          />
+        ))}
+      </div>
     </section>
   )}
 
