@@ -19,4 +19,5 @@ export const collections = {
   tech: articleCollection,
   life: articleCollection,
   books: articleCollection,
+  games: articleCollection,
 };

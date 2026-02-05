@@ -7,9 +7,10 @@ import { getCollection } from 'astro:content';
 const techPosts = await getCollection('tech', ({ data }) => !data.draft);
 const lifePosts = await getCollection('life', ({ data }) => !data.draft);
 const bookPosts = await getCollection('books', ({ data }) => !data.draft);
+const gamePosts = await getCollection('games', ({ data }) => !data.draft);
 
 // Combine and sort by date
-const allPosts = [...techPosts, ...lifePosts, ...bookPosts]
+const allPosts = [...techPosts, ...lifePosts, ...bookPosts, ...gamePosts]
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const featuredPost = allPosts.find(post => post.data.featured) || allPosts[0];
@@ -81,6 +82,10 @@ const recentPosts = allPosts.filter(post => post !== featuredPost).slice(0, 8);
       <a href="/books/" class="category-card">
         <span class="category-name">读书</span>
         <span class="category-count">{bookPosts.length} 篇</span>
+      </a>
+      <a href="/games/" class="category-card">
+        <span class="category-name">游戏</span>
+        <span class="category-count">{gamePosts.length} 篇</span>
       </a>
     </div>
   </section>
@@ -194,13 +199,13 @@ const recentPosts = allPosts.filter(post => post !== featuredPost).slice(0, 8);
   /* Categories */
   .category-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--space-4);
   }
 
-  @media (max-width: 640px) {
+  @media (min-width: 640px) {
     .category-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(4, 1fr);
     }
   }
 

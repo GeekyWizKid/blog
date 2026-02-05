@@ -7,8 +7,9 @@ import ArticleRow from '../components/ArticleRow.astro';
 const techPosts = await getCollection('tech', ({ data }) => !data.draft);
 const lifePosts = await getCollection('life', ({ data }) => !data.draft);
 const bookPosts = await getCollection('books', ({ data }) => !data.draft);
+const gamePosts = await getCollection('games', ({ data }) => !data.draft);
 
-const allPosts = [...techPosts, ...lifePosts, ...bookPosts]
+const allPosts = [...techPosts, ...lifePosts, ...bookPosts, ...gamePosts]
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 // Group by year
