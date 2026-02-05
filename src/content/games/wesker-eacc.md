@@ -3,7 +3,6 @@ title: "为什么我说《生化危机》 大 BOSS 威斯克才是真正的 e/ac
 description: "重温生化危机系列，发现老威才是最坚定的有效加速主义者（生物版）"
 date: 2026-02-05
 tags: ["生化危机", "游戏杂谈", "e/acc"]
-image: "https://images.unsplash.com/photo-1626686007369-6781d64b5784?auto=format&fit=crop&w=1600&q=80"
 ---
 
 众所周知生化 9 快出了，这几天在继续三光之旅前重温了一下生化 2、4 RE，发现老威才是最坚定的 e/acc 派（生物版），以后要叫他 **阿尔伯特·威斯克 --e/acc** （笑
