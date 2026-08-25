@@ -1,0 +1,497 @@
+---
+export interface GuideHeading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+export interface Props {
+  headings?: GuideHeading[];
+}
+
+const { headings = [] } = Astro.props;
+const outline = headings.filter(({ depth }) => depth >= 2 && depth <= 3);
+const shouldRender = outline.length >= 2;
+---
+
+{shouldRender && (
+  <nav class="reading-guide" data-reading-guide aria-label="文章快速指引">
+    <div class="reading-guide__markers">
+      {outline.map((heading, index) => (
+        <a
+          class="reading-guide__marker"
+          href={`#${heading.slug}`}
+          data-guide-link
+          data-guide-index={index}
+          data-heading-id={heading.slug}
+          data-depth={heading.depth}
+          aria-label={`跳转到：${heading.text}`}
+          title={heading.text}
+        >
+          <span class="reading-guide__marker-line"></span>
+        </a>
+      ))}
+    </div>
+
+    <button
+      class="reading-guide__toggle"
+      type="button"
+      aria-expanded="false"
+      aria-controls="reading-guide-panel"
+    >
+      <span>目录</span>
+      <span class="reading-guide__toggle-progress" data-guide-progress>0%</span>
+    </button>
+
+    <div class="reading-guide__panel" id="reading-guide-panel">
+      <div class="reading-guide__panel-header">
+        <span class="reading-guide__eyebrow">快速指引</span>
+        <span class="reading-guide__progress" data-guide-progress>0%</span>
+      </div>
+      <p class="reading-guide__current" data-guide-current>{outline[0].text}</p>
+
+      <ol class="reading-guide__outline" data-guide-outline>
+        {outline.map((heading, index) => (
+          <li data-depth={heading.depth}>
+            <a
+              href={`#${heading.slug}`}
+              data-guide-link
+              data-guide-index={index}
+              data-heading-id={heading.slug}
+            >
+              <span class="reading-guide__section-number">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <span>{heading.text}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </nav>
+)}
+
+<style>
+  .reading-guide {
+    --guide-shadow: 0 18px 55px rgb(10 10 10 / 0.13);
+    position: fixed;
+    z-index: 40;
+  }
+
+  .reading-guide__markers {
+    display: flex;
+    width: 52px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: clamp(0.18rem, 0.55vh, 0.42rem);
+    padding: var(--space-3) 0;
+  }
+
+  .reading-guide__marker {
+    display: flex;
+    width: 52px;
+    min-height: 7px;
+    align-items: center;
+    text-decoration: none;
+  }
+
+  .reading-guide__marker-line {
+    display: block;
+    width: 28px;
+    height: 2px;
+    background: var(--color-border-dark);
+    transition:
+      width 180ms ease,
+      height 180ms ease,
+      background-color 180ms ease;
+  }
+
+  .reading-guide__marker[data-depth='3'] .reading-guide__marker-line {
+    width: 16px;
+  }
+
+  .reading-guide__marker:hover .reading-guide__marker-line,
+  .reading-guide__marker:focus-visible .reading-guide__marker-line {
+    width: 38px;
+    background: var(--color-text-secondary);
+  }
+
+  .reading-guide__marker.is-active .reading-guide__marker-line {
+    width: 50px;
+    height: 3px;
+    background: var(--color-text);
+  }
+
+  .reading-guide__toggle {
+    display: none;
+  }
+
+  .reading-guide__panel {
+    position: absolute;
+    width: min(330px, calc(100vw - 104px));
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    background: var(--color-bg-secondary);
+    box-shadow: var(--guide-shadow);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 160ms ease,
+      transform 160ms ease,
+      visibility 160ms ease;
+  }
+
+  .reading-guide__panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4) var(--space-4) var(--space-2);
+  }
+
+  .reading-guide__eyebrow,
+  .reading-guide__progress {
+    color: var(--color-text-muted);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .reading-guide__current {
+    margin: 0;
+    padding: 0 var(--space-4) var(--space-3);
+    color: var(--color-text);
+    font-family: var(--font-serif);
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.35;
+  }
+
+  .reading-guide__outline {
+    max-height: min(54vh, 520px);
+    margin: 0;
+    padding: 0 var(--space-2) var(--space-2);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    list-style: none;
+    scrollbar-width: thin;
+  }
+
+  .reading-guide__outline li {
+    margin: 0;
+  }
+
+  .reading-guide__outline li[data-depth='3'] {
+    padding-left: var(--space-4);
+  }
+
+  .reading-guide__outline a {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: var(--space-2);
+    align-items: baseline;
+    padding: 0.48rem var(--space-2);
+    border-radius: 8px;
+    color: var(--color-text-secondary);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    text-decoration: none;
+    transition:
+      background-color 160ms ease,
+      color 160ms ease;
+  }
+
+  .reading-guide__outline a:hover,
+  .reading-guide__outline a:focus-visible {
+    background: var(--color-bg-muted);
+    color: var(--color-text);
+    outline: none;
+  }
+
+  .reading-guide__outline a.is-active {
+    background: var(--color-bg-muted);
+    color: var(--color-text);
+    font-weight: 600;
+  }
+
+  .reading-guide__section-number {
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    font-weight: 500;
+  }
+
+  @media (min-width: 1100px) {
+    .reading-guide {
+      top: 50%;
+      left: max(24px, calc(50vw - 470px));
+      transform: translateY(-50%);
+    }
+
+    .reading-guide__panel {
+      top: 50%;
+      left: 68px;
+      transform: translate(-8px, -50%);
+    }
+
+    .reading-guide:hover .reading-guide__panel,
+    .reading-guide:focus-within .reading-guide__panel,
+    .reading-guide.is-open .reading-guide__panel {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translate(0, -50%);
+    }
+  }
+
+  @media (max-width: 1099px) {
+    .reading-guide {
+      right: var(--space-4);
+      bottom: var(--space-4);
+    }
+
+    .reading-guide__markers {
+      display: none;
+    }
+
+    .reading-guide__toggle {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      min-height: 44px;
+      padding: 0 var(--space-4);
+      border: 1px solid var(--color-text);
+      border-radius: 999px;
+      background: var(--color-text);
+      box-shadow: 0 10px 30px rgb(10 10 10 / 0.18);
+      color: var(--color-bg);
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .reading-guide__toggle:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 3px;
+    }
+
+    .reading-guide__toggle-progress {
+      opacity: 0.68;
+      font-family: var(--font-mono);
+      font-size: 0.625rem;
+    }
+
+    .reading-guide__panel {
+      right: 0;
+      bottom: calc(100% + var(--space-3));
+      width: min(360px, calc(100vw - 2rem));
+      transform: translateY(8px);
+    }
+
+    .reading-guide.is-open .reading-guide__panel {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .reading-guide__panel {
+      max-height: min(68vh, 560px);
+    }
+
+    .reading-guide__outline {
+      max-height: min(54vh, 440px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reading-guide__marker-line,
+    .reading-guide__panel,
+    .reading-guide__outline a {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const guides = document.querySelectorAll<HTMLElement>('[data-reading-guide]');
+
+  guides.forEach((guide) => {
+    const markers = Array.from(
+      guide.querySelectorAll<HTMLElement>('.reading-guide__marker[data-heading-id]')
+    );
+    const links = Array.from(guide.querySelectorAll<HTMLAnchorElement>('[data-guide-link]'));
+    const progressLabels = Array.from(
+      guide.querySelectorAll<HTMLElement>('[data-guide-progress]')
+    );
+    const currentLabel = guide.querySelector<HTMLElement>('[data-guide-current]');
+    const outline = guide.querySelector<HTMLElement>('[data-guide-outline]');
+    const toggle = guide.querySelector<HTMLButtonElement>('.reading-guide__toggle');
+    const article = document.querySelector<HTMLElement>('.article-content');
+    const sections = markers
+      .map((marker) => {
+        const id = marker.dataset.headingId;
+        const element = id ? document.getElementById(id) : null;
+        return element ? { element, id } : null;
+      })
+      .filter((section): section is { element: HTMLElement; id: string } => Boolean(section));
+
+    if (!article || sections.length === 0) return;
+
+    let activeIndex = -1;
+    let ticking = false;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const closeGuide = () => {
+      guide.classList.remove('is-open');
+      toggle?.setAttribute('aria-expanded', 'false');
+    };
+
+    const setActive = (index: number) => {
+      if (index === activeIndex) return;
+      activeIndex = index;
+
+      links.forEach((link) => {
+        const isActive = Number(link.dataset.guideIndex) === index;
+        link.classList.toggle('is-active', isActive);
+        if (isActive) {
+          link.setAttribute('aria-current', 'location');
+        } else {
+          link.removeAttribute('aria-current');
+        }
+      });
+
+      const activeSection = sections[index];
+      const activeOutlineLink = guide.querySelector<HTMLElement>(
+        `.reading-guide__outline [data-guide-index="${index}"]`
+      );
+
+      if (currentLabel && activeOutlineLink) {
+        const title = activeOutlineLink.querySelector('span:last-child')?.textContent?.trim();
+        if (title) currentLabel.textContent = title;
+      }
+
+      if (outline && activeOutlineLink) {
+        const itemTop = activeOutlineLink.offsetTop;
+        const itemBottom = itemTop + activeOutlineLink.offsetHeight;
+        if (itemTop < outline.scrollTop) {
+          outline.scrollTop = itemTop;
+        } else if (itemBottom > outline.scrollTop + outline.clientHeight) {
+          outline.scrollTop = itemBottom - outline.clientHeight;
+        }
+      }
+
+      if (activeSection) {
+        guide.dataset.activeHeading = activeSection.id;
+      }
+    };
+
+    const update = () => {
+      const guideLine = window.scrollY + Math.min(window.innerHeight * 0.2, 180);
+      let nextActive = 0;
+
+      sections.forEach(({ element }, index) => {
+        const top = window.scrollY + element.getBoundingClientRect().top;
+        if (top <= guideLine) nextActive = index;
+      });
+
+      setActive(nextActive);
+
+      const articleTop = window.scrollY + article.getBoundingClientRect().top;
+      const start = articleTop - window.innerHeight * 0.28;
+      const end = articleTop + article.offsetHeight - window.innerHeight * 0.72;
+      const progress = Math.round(
+        Math.max(0, Math.min(1, (window.scrollY - start) / Math.max(1, end - start))) * 100
+      );
+
+      progressLabels.forEach((label) => {
+        label.textContent = `${progress}%`;
+      });
+
+      ticking = false;
+    };
+
+    const scheduleUpdate = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(update);
+    };
+
+    links.forEach((link) => {
+      link.addEventListener('click', (event) => {
+        const id = link.dataset.headingId;
+        const target = id ? document.getElementById(id) : null;
+        if (!target) return;
+
+        event.preventDefault();
+        target.scrollIntoView({
+          behavior: reducedMotion.matches ? 'auto' : 'smooth',
+          block: 'start'
+        });
+        window.history.replaceState(null, '', `#${id}`);
+        closeGuide();
+      });
+    });
+
+    toggle?.addEventListener('click', () => {
+      const open = guide.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', String(open));
+    });
+
+    document.addEventListener('click', (event) => {
+      if (event.target instanceof Node && !guide.contains(event.target)) closeGuide();
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeGuide();
+        toggle?.focus();
+      }
+    });
+
+    window.addEventListener('scroll', scheduleUpdate, { passive: true });
+    window.addEventListener('resize', scheduleUpdate);
+    new ResizeObserver(scheduleUpdate).observe(article);
+    update();
+
+    const alignInitialHash = () => {
+      if (!window.location.hash) return;
+
+      let hashId = window.location.hash.slice(1);
+      try {
+        hashId = decodeURIComponent(hashId);
+      } catch {
+        return;
+      }
+
+      const target = sections.find(({ id }) => id === hashId)?.element;
+      if (!target) return;
+
+      const imagesReady = Array.from(article.querySelectorAll('img')).map((image) =>
+        image.decode().catch(() => undefined)
+      );
+
+      void Promise.all([document.fonts.ready, ...imagesReady]).then(() => {
+        const positionTarget = () => {
+          target.scrollIntoView({ behavior: 'auto', block: 'start' });
+          scheduleUpdate();
+        };
+
+        window.requestAnimationFrame(positionTarget);
+        window.setTimeout(positionTarget, 200);
+      });
+    };
+
+    if (document.readyState === 'complete') {
+      alignInitialHash();
+    } else {
+      window.addEventListener('load', alignInitialHash, { once: true });
+    }
+  });
+</script>
