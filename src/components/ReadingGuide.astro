@@ -116,6 +116,11 @@ const shouldRender = outline.length >= 2;
     background: var(--color-text-secondary);
   }
 
+  .reading-guide__marker.is-preview:not(.is-active) .reading-guide__marker-line {
+    width: 42px;
+    background: var(--color-text-secondary);
+  }
+
   .reading-guide__marker.is-active .reading-guide__marker-line {
     width: 50px;
     height: 3px;
@@ -208,6 +213,11 @@ const shouldRender = outline.length >= 2;
     background: var(--color-bg-muted);
     color: var(--color-text);
     outline: none;
+  }
+
+  .reading-guide__outline a.is-preview:not(.is-active) {
+    background: var(--color-bg-muted);
+    color: var(--color-text);
   }
 
   .reading-guide__outline a.is-active {
@@ -345,12 +355,59 @@ const shouldRender = outline.length >= 2;
     if (!article || sections.length === 0) return;
 
     let activeIndex = -1;
+    let previewIndex: number | null = null;
     let ticking = false;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     const closeGuide = () => {
       guide.classList.remove('is-open');
       toggle?.setAttribute('aria-expanded', 'false');
+    };
+
+    const syncOutline = (index: number) => {
+      const outlineLink = guide.querySelector<HTMLElement>(
+        `.reading-guide__outline [data-guide-index="${index}"]`
+      );
+
+      if (currentLabel && outlineLink) {
+        const title = outlineLink.querySelector('span:last-child')?.textContent?.trim();
+        if (title) currentLabel.textContent = title;
+      }
+
+      if (outline && outlineLink) {
+        const itemTop = outlineLink.offsetTop;
+        const itemBottom = itemTop + outlineLink.offsetHeight;
+        if (itemTop < outline.scrollTop) {
+          outline.scrollTop = itemTop;
+        } else if (itemBottom > outline.scrollTop + outline.clientHeight) {
+          outline.scrollTop = itemBottom - outline.clientHeight;
+        }
+      }
+    };
+
+    const setPreview = (index: number) => {
+      if (index === previewIndex) return;
+      previewIndex = index;
+
+      links.forEach((link) => {
+        link.classList.toggle('is-preview', Number(link.dataset.guideIndex) === index);
+      });
+
+      const previewSection = sections[index];
+      if (previewSection) {
+        guide.dataset.previewHeading = previewSection.id;
+      }
+
+      syncOutline(index);
+    };
+
+    const clearPreview = () => {
+      if (previewIndex === null) return;
+      previewIndex = null;
+      links.forEach((link) => link.classList.remove('is-preview'));
+      delete guide.dataset.previewHeading;
+
+      if (activeIndex >= 0) syncOutline(activeIndex);
     };
 
     const setActive = (index: number) => {
@@ -368,28 +425,12 @@ const shouldRender = outline.length >= 2;
       });
 
       const activeSection = sections[index];
-      const activeOutlineLink = guide.querySelector<HTMLElement>(
-        `.reading-guide__outline [data-guide-index="${index}"]`
-      );
-
-      if (currentLabel && activeOutlineLink) {
-        const title = activeOutlineLink.querySelector('span:last-child')?.textContent?.trim();
-        if (title) currentLabel.textContent = title;
-      }
-
-      if (outline && activeOutlineLink) {
-        const itemTop = activeOutlineLink.offsetTop;
-        const itemBottom = itemTop + activeOutlineLink.offsetHeight;
-        if (itemTop < outline.scrollTop) {
-          outline.scrollTop = itemTop;
-        } else if (itemBottom > outline.scrollTop + outline.clientHeight) {
-          outline.scrollTop = itemBottom - outline.clientHeight;
-        }
-      }
 
       if (activeSection) {
         guide.dataset.activeHeading = activeSection.id;
       }
+
+      if (previewIndex === null) syncOutline(index);
     };
 
     const update = () => {
@@ -424,6 +465,16 @@ const shouldRender = outline.length >= 2;
     };
 
     links.forEach((link) => {
+      const index = Number(link.dataset.guideIndex);
+
+      link.addEventListener('pointerenter', () => {
+        if (Number.isInteger(index)) setPreview(index);
+      });
+
+      link.addEventListener('focus', () => {
+        if (Number.isInteger(index)) setPreview(index);
+      });
+
       link.addEventListener('click', (event) => {
         const id = link.dataset.headingId;
         const target = id ? document.getElementById(id) : null;
@@ -435,8 +486,15 @@ const shouldRender = outline.length >= 2;
           block: 'start'
         });
         window.history.replaceState(null, '', `#${id}`);
+        clearPreview();
         closeGuide();
       });
+    });
+
+    guide.addEventListener('pointerleave', clearPreview);
+    guide.addEventListener('focusout', (event) => {
+      const nextTarget = event.relatedTarget;
+      if (!(nextTarget instanceof Node) || !guide.contains(nextTarget)) clearPreview();
     });
 
     toggle?.addEventListener('click', () => {
